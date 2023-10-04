@@ -1,0 +1,387 @@
+with 
+--MQL
+mql as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+recent_mQl_date as MQL_Date,
+--date_trunc('month',first_mQl_date) as MQL_Month,
+count(distinct  email ) as MQL_Count--,
+--count(distinct  case when opp_s1_date is not null then email end) as MQL_S1_count
+from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+ where recent_mql_date >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12),
+
+--S1
+s1 as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+opp_s1_date  as s1_Date,
+--date_trunc('month',recent_s1_date) as s1_Month,
+count(distinct  case when opp_s1_date is not null 
+then email end ) as s1_Count_created,
+count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open'
+then email end ) as s1_Count_open,
+sum(distinct  case when opp_s1_date is not null 
+then pipeline_revised  end ) as s1_Amount_created,
+count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open'
+then pipeline_revised  end ) as s1_Amount_open,
+sum(case when opp_s1_date is not null 
+then acv  end ) as Acv_Amount_created
+  from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+ where opp_s1_date >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12),
+
+--Won
+won as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+opp_closedate  as won_Date,
+count(distinct  case when opp_closedate is not null and opp_iswon =1
+then email end ) as Won_count,
+sum( case when opp_closedate is not null and opp_iswon =1 then
+pipeline_revised  end) as Won_Pipe_amount,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+then acv  end ) as Acv_Amount_won,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+first_lead_first_touch_new_mrr end) as MRR_Amount_won,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+first_lead_first_touch_new_mrr*12 end) as ARR_Amount_won
+  from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+ where opp_closedate >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12),
+
+--Signup
+signup as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+signup_dttm  as signup_Date,
+count(distinct case when trial_signups= 1 and email=owner_email 
+then email end ) as core_trial_count,
+count(distinct case when free_esign_signups = 1 
+then email end ) as free_esign_count
+  from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+ where signup_dttm >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12)
+
+--Inquiry
+inquiry as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+lead_create_date  as Inquiry_Date,
+count(distinct case when lead_inquiry>0 
+then email end ) as Inquiry_count
+  from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+ where lead_create_date >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12),
+--Demo Booked 
+demo_bk as (
+select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+case when recent_chillipiper_booked_date is not null  then recent_chillipiper_booked_date
+when  recent_drift_booked_date is not null then  recent_drift_booked_date  end as demo_booked_date, 
+count(distinct case when recent_chillipiper_booked_date is not null or recent_drift_booked_date is not null then email end ) as demo_booked_count
+from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+where (recent_chillipiper_booked_date >='2022-01-01' or recent_drift_booked_date>='2022-01-01') and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12),
+--demo_form
+demo_submission as 
+(select case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when country='United States' then 'US' else 'Non-US' end as Country,
+recent_demo_Requested_Date as demo_requested_date, 
+count(distinct case when recent_demo_Requested_Date is not null then email end ) as demo_requested_count
+from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+where recent_demo_Requested_Date >='2022-01-01' and company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+') 
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12
+),
+ dt as (select * from 
+(select distinct fmcd.date
+from dbt_analytics.fi_mrr_calendar_daily fmcd 
+where date>='2022-01-01') , (select distinct case when hs_language ilike '%English%' or hs_language='en-US' then 'English' else 'Non-Engish' end as language,
+Demo_booked_status_Sales_Ops, --TBD
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+else null end as demo_requested_nonProd,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+else null end as demo_request_Prod,
+case when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'  
+and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Requests' 
+when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
+ and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
+ when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
+ CASE
+    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
+    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
+    ELSE 'Non-Google and Bing Campaigns'
+  END AS orig_camp,
+case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
+	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
+	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
+new_mktg_class,
+company_size_bucket, 
+case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
+else 'Others' end as email_type,
+--case when trial_signups>0 then 'Trial' else 'Not Trial' end as Trial_Status,
+case when mcralv .country='United States' then 'US' else 'Non-US' end as Country
+from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv  
+where company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+')
+and mcralv.signup_dttm >='2022-01-01')
+) 
+select dt.date, dt.language, dt.Demo_booked_status_Sales_Ops,dt.demo_requested_nonProd,
+dt.demo_request_Prod,dt.trials_demo_request_Classification,dt.orig_camp, 
+dt.first_lead_classification ,--better for signup landing page
+dt.new_mktg_class, dt.company_size_bucket, dt.email_type,  dt.Country,
+core_trial_count,
+free_esign_count,
+demo_booked_count,
+Inquiry_count,
+MQL_Count,
+from dt left join signup 
+on dt.date=signup.signup_dttm 
+and dt.language=signup.language 
+and dt.Demo_booked_status_Sales_Ops=signup.Demo_booked_status_Sales_Ops
+and dt.demo_requested_nonProd=signup.demo_requested_nonProd
+and dt.demo_request_Prod=signup.demo_request_Prod
+and dt.trials_demo_request_Classification=signup.trials_demo_request_Classification
+and dt.orig_camp=signup.orig_camp
+and dt.first_lead_classification= signup.first_lead_classification
+and dt.new_mktg_class=signup.new_mktg_class
+and dt.company_size_bucket=signup.company_size_bucket
+and dt.email_type=signup.email_type
+and dt.Country=signup.Country
+left join demo_bk dbk 
+on dt.date=dbk.demo_booked_date
+and dt.language=dbk.language 
+and dt.Demo_booked_status_Sales_Ops=dbk.Demo_booked_status_Sales_Ops
+and dt.demo_requested_nonProd=dbk.demo_requested_nonProd
+and dt.demo_request_Prod=dbk.demo_request_Prod
+and dt.trials_demo_request_Classification=dbk.trials_demo_request_Classification
+and dt.orig_camp=dbk.orig_camp
+and dt.first_lead_classification= dbk.first_lead_classification
+and dt.new_mktg_class=dbk.new_mktg_class
+and dt.company_size_bucket=dbk.company_size_bucket
+and dt.email_type=dbk.email_type
+and dt.Country=dbk.Country
+left join inquiry iq 
+on dt.date=iq.Inquiry_date
+and dt.language=iq.language 
+and dt.Demo_booked_status_Sales_Ops=iq.Demo_booked_status_Sales_Ops
+and dt.demo_requested_nonProd=iq.demo_requested_nonProd
+and dt.demo_request_Prod=iq.demo_request_Prod
+and dt.trials_demo_request_Classification=iq.trials_demo_request_Classification
+and dt.orig_camp=iq.orig_camp
+and dt.first_lead_classification= iq.first_lead_classification
+and dt.new_mktg_class=iq.new_mktg_class
+and dt.company_size_bucket=iq.company_size_bucket
+and dt.email_type=iq.email_type
+and dt.Country=iq.Country
+left join mql
+on dt.date=mql.mql_date
+and dt.language=mql.language 
+and dt.Demo_booked_status_Sales_Ops=mql.Demo_booked_status_Sales_Ops
+and dt.demo_requested_nonProd=mql.demo_requested_nonProd
+and dt.demo_request_Prod=mql.demo_request_Prod
+and dt.trials_demo_request_Classification=mql.trials_demo_request_Classification
+and dt.orig_camp=mql.orig_camp
+and dt.first_lead_classification= mql.first_lead_classification
+and dt.new_mktg_class=mql.new_mktg_class
+and dt.company_size_bucket=mql.company_size_bucket
+and dt.email_type=mql.email_type
+and dt.Country=mql.Country
+left join demo_submission dsm 
+on dt.date=dsm.demo_requested_date
+and dt.language=dsm.language 
+and dt.Demo_booked_status_Sales_Ops=dsm.Demo_booked_status_Sales_Ops
+and dt.demo_requested_nonProd=dsm.demo_requested_nonProd
+and dt.demo_request_Prod=dsm.demo_request_Prod
+and dt.trials_demo_request_Classification=dsm.trials_demo_request_Classification
+and dt.orig_camp=dsm.orig_camp
+and dt.first_lead_classification= dsm.first_lead_classification
+and dt.new_mktg_class=dsm.new_mktg_class
+and dt.company_size_bucket=dsm.company_size_bucket
+and dt.email_type=dsm.email_type
+and dt.Country=dsm.Country
+;

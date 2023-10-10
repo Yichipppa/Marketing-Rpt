@@ -18,12 +18,12 @@ when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser'
     WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
     WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
     ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+  END AS orig_camp,--Will modified
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+new_mktg_class, --[will modified]
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,

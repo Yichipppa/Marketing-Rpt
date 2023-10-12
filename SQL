@@ -1239,8 +1239,10 @@ where company_size_bucket in ('1-10','11-50','51-200','201-1000','1001+')
 and mcralv.signup_dttm >='2022-01-01')
 ) 
 select dt.date, dt.language, dt.Demo_booked_status_Sales_Ops,dt.demo_requested_nonProd,
-dt.demo_request_Prod,dt.trials_demo_request_Classification,dt.orig_camp, 
-dt.first_lead_classification ,--better for signup landing page
+dt.demo_request_Prod,
+dt.trials_demo_request_Classification,
+dt.orig_camp, 
+dt.landing_page ,--better for signup landing page
 dt.new_mktg_class,
 dt.LP_Cluster, 
 dt.company_size_bucket, dt.email_type,  dt.Country,

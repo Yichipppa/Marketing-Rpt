@@ -14,16 +14,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,--Will modified
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class, --[will modified]
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class, --[will modified]
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -52,16 +107,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -98,16 +208,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -143,16 +308,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -182,16 +402,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -218,16 +493,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -254,16 +584,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,
@@ -291,16 +676,71 @@ and  all_Demo_status <> 'Demo Requested from Product'  then 'Non-product Demo Re
 when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
  and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
  when Inquiry_Path_Classification='Trials' then 'Trials' end as trials_demo_request_Classification,
- CASE
-    WHEN mktg_chnl_camp_based ILIKE 'Google%' THEN orig_campaign
-    WHEN mktg_chnl_camp_based ILIKE 'Bing%' THEN orig_campaign
-    ELSE 'Non-Google and Bing Campaigns'
-  END AS orig_camp,
+ case when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*'  THEN 'Brand'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' then 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+when  lower(first_seen_mode) ilike '%utm_medium=cpc%' and  first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-api.*' and first_seen_mode !~* '.*retargeting.*' THEN 'API'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~* '.*-contract.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Contracts'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+when  lower(first_seen_mode) ilike '%utm_medium=paid-social%' and lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+when lower(first_seen_mode) ~* '.*rmkt=true.*' then 'RMKT'
+when lower(first_seen_mode) ~* '.*dv360_video.*' then 'Video'
+when lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+when lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+ELSE null end AS orig_camp,
 case when first_seen_mode='https://www.pandadoc.com/' or first_seen_mode='https://signup.pandadoc.com/'then first_seen_mode 
 	when first_seen_mode ilike '%/?ss=%' then first_seen_mode 
 	when first_seen_mode ilike '%oauth%'  then REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
 else REGEXP_SUBSTR(first_seen_mode , '^(https?://[^/?]+/[^?]+)', 1, 1, 'i') end as landing_page ,--better for signup landing page
-new_mktg_class,
+CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
 company_size_bucket, 
 case when email_type in ('Business Email Domain','Government Email Domain','Education Email Domain','Personal Email Domain') then email_type 
 else 'Others' end as email_type,

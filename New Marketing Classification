@@ -1,0 +1,131 @@
+DROP TABLE IF EXISTS yichi_zhang.new_mktg_classification;
+-- Create the table in your desired schema
+CREATE TABLE yichi_zhang.new_mktg_classification  (
+    first_seen_mode VARCHAR(255),
+   mktg_chnl VARCHAR(255), -- Adjust the data types as needed
+    orig_camp VARCHAR(255),
+    landing_page VARCHAR(255),
+    new_mktg_class VARCHAR(255),
+    lp_cluster VARCHAR(255)
+);
+
+-- Insert data into the table from your source table (dm_main.marketing_channel_ranking_attrib_logic_vw)
+INSERT INTO yichi_zhang.new_mktg_classification 
+select distinct
+   first_seen_mode,mktg_chnl,
+CASE
+        WHEN lower(first_seen_mode) ILIKE '%utm_medium=cpc%' THEN
+            CASE
+                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Brand'
+                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' THEN 'API'
+                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+                when first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
+                when   first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
+                when   first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
+            END
+        WHEN lower(first_seen_mode) ILIKE '%utm_medium=review_sites%'  or   lower(first_seen_mode) ilike '%utm_medium=review-sites%' THEN
+            CASE
+                WHEN first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
+                WHEN first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
+                when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
+                when  first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
+                when   first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
+                when   first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
+                when first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
+                when   first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+                END
+        WHEN lower(first_seen_mode) ILIKE '%utm_medium=paid-social%' THEN
+            CASE
+                WHEN lower(first_seen_mode) ~* '.*-api.*' THEN 'API'
+                WHEN lower(first_seen_mode) ~* '.*-contract.*' THEN 'Contracts'
+                when  lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
+                when  lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+                when  lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
+                when  lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
+                END
+        WHEN lower(first_seen_mode) ~* '.*rmkt=true.*' THEN 'RMKT'
+        WHEN lower(first_seen_mode) ~* '.*dv360_video.*' THEN 'Video'
+        WHEN lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
+        WHEN lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+    END AS orig_camp,
+    CASE
+        WHEN first_seen_mode IN ('https://www.pandadoc.com/', 'https://signup.pandadoc.com/') THEN first_seen_mode
+        WHEN first_seen_mode ILIKE '%/?ss=%' THEN first_seen_mode
+        WHEN first_seen_mode ILIKE '%oauth%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
+        ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+/[^?]+)', 1, 1, 'i')
+    END AS landing_page,
+    CASE
+    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
+    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
+    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
+    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
+    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
+    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' --or new_mktg_class = 'Paid Social' 
+     THEN 'Paid social'
+    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
+          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
+    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
+    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
+    WHEN mktg_chnl= 'Direct' then 'Direct'
+    ELSE 'Other'
+  END AS new_mktg_class,
+    case  when lower(first_seen_mode) ~* '.*(signup|register).pandadoc.com.*' then 'Signup'
+      when lower(first_seen_mode) ~* '.*notary\.pandadoc\.com.*' then 'Notary'
+      when lower(first_seen_mode) ~* '.*\/pdf-cases\/.*' then 'Microapp'
+      when lower(first_seen_mode) ~* '.*www.pandadoc.com/blog.*' then 'Blog'
+      when lower(first_seen_mode) ~* '.*www.pandadoc.com/(how-to|ask\/).*' then 'Ask'
+      when lower(first_seen_mode) ~* '.*(template|agreement).*' then 'Templates'
+      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/($|es\/|fr\/|de\/|nl\/|pl\/|pt-pt\/|se\/|es|fr|de|nl|pl|pt-pt|se).*' then 'Homepage'
+      when lower(first_seen_mode) ~* '.*pricing.*' then 'Pricing'
+      when lower(first_seen_mode) ~* '.*tour.*' then 'Tour'
+      when lower(first_seen_mode) ~* '.*(demo|getdemo).pandadoc.com/.*|.*www.pandadoc.com/lp-demo/|.*www.pandadoc.com/demo/' then 'Demo'
+      when lower(first_seen_mode) ~* '.*alternative.*' then 'Alternatives' 
+      when lower(first_seen_mode) ~* '.*\/api\/.*|.*developers\.pandadoc\.com.*' then 'API Dev'
+      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/(careers\/.*|about\/|awards\/.*|press.*|security\/.*|ui-kit.*|.*privacy-notice.*|.*gdpr.*|.*cookie-notice.*|.*terms-of-use.*)' then 'Company'
+      when lower(first_seen_mode) ~* '.*support\.pandadoc\.com.*' then 'Support'
+      when lower(first_seen_mode) ~* '.*pd\.test.*|.*stg.*\.sealdocs\.com.*' then 'Stg'
+      when lower(first_seen_mode) ~* '.*\/(customer-stories|customers-case-study)\/.*' then 'Case studies'
+      when lower(first_seen_mode) ~* '.*(contact|contact-sales)\/' then 'Contact'
+      when lower(first_seen_mode) ~* '.*\/(contract-management-software|contract-generator)\/.*' then 'Product-contracts'
+      when lower(first_seen_mode) ~* '.*\/document-(management|automation|generation|sharing|tracking).*' then 'Product-document management'
+      when lower(first_seen_mode) ~* '.*(electronic-signature-(software|app)|digital-signature-(software|creator)|sign-documents-online).*' then 'Product-esign'
+      when lower(first_seen_mode) ~* '.*electronic-signature-law.*' then 'eSign Law'
+      when lower(first_seen_mode) ~* '.*/features/.*' then 'PD features'
+      when lower(first_seen_mode) ~* '.*(pandadoc-forms|form-builder-software).*' then 'Product-Forms'
+      when lower(first_seen_mode) ~* '.*free-electronic-signature-software.*' then 'Product-Free eSign'
+      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/(lp\/g2|g2).*' then 'LP-generic'
+      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/industries\/.*' then 'Industries'
+      when lower(first_seen_mode) ~* '.*integration.*' then  'Integrations'
+      when lower(first_seen_mode) ~* '.*library.*' then 'Library'
+     when lower(first_seen_mode) ~* '.*(payments|payment-collection-software).*' then 'Product-payments'
+      when lower(first_seen_mode) ~* '.*proposal.*' then 'Product-proposals'
+      when lower(first_seen_mode) ~* '.*(quoting-software|quote-builder-software).*' then 'Product-quotes'
+     when lower(first_seen_mode) ~* '.*search.*' then 'Search'
+      when lower(first_seen_mode) ~* 'pandadoc-for-.*' then 'Teams'
+     else 'Other'
+      end as LP_Cluster
+FROM dm_main.marketing_channel_ranking_attrib_logic_vw
+WHERE company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
+and email is not null;

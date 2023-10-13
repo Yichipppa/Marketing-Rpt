@@ -332,7 +332,7 @@ group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
  dt as (select * from 
 (select distinct fmcd.date
 from dbt_analytics.fi_mrr_calendar_daily fmcd 
-where date>='2022-01-01') , (select distinct
+where date>='2022-01-01' and date< current_date) , (select distinct
   language,
   Demo_booked_status_Sales_Ops, 
 demo_requested_nonProd,

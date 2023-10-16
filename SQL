@@ -1,6 +1,7 @@
 with 
 New_tb as (
-select case
+select  
+  case
     when hs_language ilike '%English%' or hs_language='en-US' 
     then 'English' 
      else 'Non-Engish' 
@@ -23,119 +24,11 @@ case
     and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
     when Inquiry_Path_Classification='Trials' then 'Trials' 
   end as trials_demo_request_Classification,
-CASE
-        WHEN lower(first_seen_mode) ILIKE '%utm_medium=cpc%' THEN
-            CASE
-                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Brand'
-                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' THEN 'API'
-                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
-                when first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*' and first_seen_mode !~* '.*(PDF|Free).*' THEN 'eSign'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures_PDF.*' and first_seen_mode !~* '.*Free.*' THEN 'eSign_PDF'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_eSignatures.*Free.*' THEN 'eSign_Free'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Industries.*' THEN 'Industries'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*' and first_seen_mode !~* '.*(Salesforce|Competitors).*' THEN 'Integrations'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations.*Salesforce.*' and first_seen_mode !~* '.*Competitors.*' THEN 'Integrations_Salesforce'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
-                when   first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
-                when   first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
-            END
-        WHEN lower(first_seen_mode) ILIKE '%utm_medium=review_sites%'  or   lower(first_seen_mode) ilike '%utm_medium=review-sites%' THEN
-            CASE
-                WHEN first_seen_mode ~* '.*listing_default.*' THEN 'Brand'
-                WHEN first_seen_mode ~* '.*listing_(document_management|sales_enablement|workflow_management).*' THEN 'All Solutions'
-                when  (lower(first_seen_mode) ilike '%utm_medium=review_sites%' or lower(first_seen_mode) ilike '%utm_medium=review-sites%') and first_seen_mode ~* '.*listing_contract_management.*' THEN 'Contracts'
-                when  first_seen_mode ~* '.*listing_(esignature|digital_signature).*' THEN 'eSign'
-                when   first_seen_mode ~* '.*listing_hr.*' THEN 'Industries'
-                when   first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
-                when first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
-                when   first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
-                END
-        WHEN lower(first_seen_mode) ILIKE '%utm_medium=paid-social%' THEN
-            CASE
-                WHEN lower(first_seen_mode) ~* '.*-api.*' THEN 'API'
-                WHEN lower(first_seen_mode) ~* '.*-contract.*' THEN 'Contracts'
-                when  lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
-                when  lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
-                when  lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
-                when  lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
-                END
-        WHEN lower(first_seen_mode) ~* '.*rmkt=true.*' THEN 'RMKT'
-        WHEN lower(first_seen_mode) ~* '.*dv360_video.*' THEN 'Video'
-        WHEN lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
-        WHEN lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
-    END AS orig_camp,
-    CASE
-        WHEN first_seen_mode IN ('https://www.pandadoc.com/', 'https://signup.pandadoc.com/') THEN first_seen_mode
-        WHEN first_seen_mode ILIKE '%/?ss=%' THEN first_seen_mode
-        WHEN first_seen_mode ILIKE '%oauth%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
-        ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+/[^?]+)', 1, 1, 'i')
-    END AS landing_page,
-    CASE
-    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
-    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
-    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
-    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
-    WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
-    WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
-    WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
-    WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
-    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
-   -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
-    WHEN lower(first_seen_mode) ~*  '.*paid-social.*' or new_mktg_class = 'Paid Social'  THEN 'Paid social'
-    WHEN (lower(first_seen_mode) ~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*'
-          and lower(first_seen_mode) ilike '%utm_medium=referral%') THEN 'Organic social'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=social%' THEN 'Organic social'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=referral%' AND first_seen_mode !~*  '.*(facebook|linkedin|youtube|pinterest|instagram|reddit|quora).*' THEN 'Referring sites'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=pd%'  AND first_seen_mode !~*  '.*viral.*' AND first_seen_mode not ilike '%utm_source=viral%' THEN 'Product'
-    WHEN lower(first_seen_mode) ~*  '.*review(_|-)sites.*' THEN 'Review sites'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=affiliate%' THEN 'Affiliates'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=email%' THEN 'Email'
-    WHEN lower(first_seen_mode) ilike '%utm_medium=partner%' THEN 'Partner'
-    WHEN mktg_chnl= 'Direct' then 'Direct'
-    ELSE 'Other'
-  END AS new_mktg_class,
-    case  when lower(first_seen_mode) ~* '.*(signup|register).pandadoc.com.*' then 'Signup'
-      when lower(first_seen_mode) ~* '.*notary\.pandadoc\.com.*' then 'Notary'
-      when lower(first_seen_mode) ~* '.*\/pdf-cases\/.*' then 'Microapp'
-      when lower(first_seen_mode) ~* '.*www.pandadoc.com/blog.*' then 'Blog'
-      when lower(first_seen_mode) ~* '.*www.pandadoc.com/(how-to|ask\/).*' then 'Ask'
-      when lower(first_seen_mode) ~* '.*(template|agreement).*' then 'Templates'
-      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/($|es\/|fr\/|de\/|nl\/|pl\/|pt-pt\/|se\/|es|fr|de|nl|pl|pt-pt|se).*' then 'Homepage'
-      when lower(first_seen_mode) ~* '.*pricing.*' then 'Pricing'
-      when lower(first_seen_mode) ~* '.*tour.*' then 'Tour'
-      when lower(first_seen_mode) ~* '.*(demo|getdemo).pandadoc.com/.*|.*www.pandadoc.com/lp-demo/|.*www.pandadoc.com/demo/' then 'Demo'
-      when lower(first_seen_mode) ~* '.*alternative.*' then 'Alternatives' 
-      when lower(first_seen_mode) ~* '.*\/api\/.*|.*developers\.pandadoc\.com.*' then 'API Dev'
-      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/(careers\/.*|about\/|awards\/.*|press.*|security\/.*|ui-kit.*|.*privacy-notice.*|.*gdpr.*|.*cookie-notice.*|.*terms-of-use.*)' then 'Company'
-      when lower(first_seen_mode) ~* '.*support\.pandadoc\.com.*' then 'Support'
-      when lower(first_seen_mode) ~* '.*pd\.test.*|.*stg.*\.sealdocs\.com.*' then 'Stg'
-      when lower(first_seen_mode) ~* '.*\/(customer-stories|customers-case-study)\/.*' then 'Case studies'
-      when lower(first_seen_mode) ~* '.*(contact|contact-sales)\/' then 'Contact'
-      when lower(first_seen_mode) ~* '.*\/(contract-management-software|contract-generator)\/.*' then 'Product-contracts'
-      when lower(first_seen_mode) ~* '.*\/document-(management|automation|generation|sharing|tracking).*' then 'Product-document management'
-      when lower(first_seen_mode) ~* '.*(electronic-signature-(software|app)|digital-signature-(software|creator)|sign-documents-online).*' then 'Product-esign'
-      when lower(first_seen_mode) ~* '.*electronic-signature-law.*' then 'eSign Law'
-      when lower(first_seen_mode) ~* '.*/features/.*' then 'PD features'
-      when lower(first_seen_mode) ~* '.*(pandadoc-forms|form-builder-software).*' then 'Product-Forms'
-      when lower(first_seen_mode) ~* '.*free-electronic-signature-software.*' then 'Product-Free eSign'
-      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/(lp\/g2|g2).*' then 'LP-generic'
-      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/industries\/.*' then 'Industries'
-      when lower(first_seen_mode) ~* '.*integration.*' then  'Integrations'
-      when lower(first_seen_mode) ~* '.*library.*' then 'Library'
-     when lower(first_seen_mode) ~* '.*(payments|payment-collection-software).*' then 'Product-payments'
-      when lower(first_seen_mode) ~* '.*proposal.*' then 'Product-proposals'
-      when lower(first_seen_mode) ~* '.*(quoting-software|quote-builder-software).*' then 'Product-quotes'
-     when lower(first_seen_mode) ~* '.*search.*' then 'Search'
-      when lower(first_seen_mode) ~* 'pandadoc-for-.*' then 'Teams'
-     else 'Other'
-      end as LP_Cluster,
-    company_size_bucket,
+    nmc.orig_camp,
+    nmc.landing_page,
+    nmc.new_mktg_class,
+    nmc.lp_cluster,
+     company_size_bucket,
     CASE
         WHEN email_type IN ('Business Email Domain', 'Government Email Domain', 'Education Email Domain', 'Personal Email Domain') THEN email_type
         ELSE 'Others'
@@ -144,29 +37,41 @@ CASE
         WHEN country = 'United States' THEN 'US'
         ELSE 'Non-US'
     END AS Country,
-   email, 
-recent_mQl_date, 
-opp_s1_date ,
-opportunity_status,
-pipeline_revised,
-acv,
-opp_closedate ,
-opp_iswon,
-first_lead_first_touch_new_mrr,
-signup_dttm ,
-first_lead_classification,
-trial_signups, 
-owner_email ,
-free_esign_signups,
-lead_create_date,
-lead_inquiry,
-recent_chillipiper_booked_date,
-recent_drift_booked_date,
-recent_demo_Requested_Date
-from dm_main.marketing_channel_ranking_attrib_logic_vw mcralv
-where company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
+    email,
+    recent_mql_date ,
+    opp_s1_date,
+    opportunity_status,
+    pipeline_revised,
+    acv, -- Adjust the precision and scale for your data
+    opp_closedate ,
+    opp_iswon,
+    first_lead_first_touch_new_mrr ,
+    signup_dttm , -- If this field contains both date and time
+    first_lead_classification ,
+    trial_signups, -- Adjust the data type as needed
+    owner_email,
+    free_esign_signups, -- Adjust the data type as needed
+    lead_create_date,
+    lead_inquiry,
+    recent_chillipiper_booked_date ,
+    recent_drift_booked_date ,
+    recent_demo_requested_date 
+from dm_main.marketing_channel_ranking_attrib_logic_vw r
+left join 
+yichi_zhang.new_mktg_classification nmc
+on r.first_seen_mode=nmc.first_seen_mode
+and r.mktg_chnl=nmc.mktg_chnl
+where (recent_mQl_date>='2022-01-01' or 
+opp_s1_date >='2022-01-01' or
+opp_closedate >='2022-01-01' or 
+signup_dttm >='2022-01-01' or 
+lead_create_date>='2022-01-01' or 
+recent_drift_booked_date>='2022-01-01' or 
+recent_chillipiper_booked_date>='2022-01-01' or 
+recent_demo_Requested_Date>='2022-01-01'  ) 
+and company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
+and email is not null
 ),
---MQL
 mql as (
 SELECT
  language,
@@ -186,8 +91,8 @@ orig_camp,
 FROM New_tb tb
 WHERE recent_mql_date >= '2022-01-01'
     AND company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
-
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+),
 --S1
 s1 as (
 SELECT
@@ -211,7 +116,8 @@ count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open
 sum(case when opp_s1_date is not null then acv end ) as Acv_Amount_created
   from New_tb
  where opp_s1_date >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13),
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+),
 
 --Won
 won as (
@@ -241,7 +147,8 @@ sum(case when opp_closedate is not null and opp_iswon =1 then
 first_lead_first_touch_new_mrr*12 end) as ARR_Amount_won
   from New_tb
  where opp_closedate >='2022-01-01'  
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13),
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+),
 
 --Signup
 signup as (
@@ -264,7 +171,8 @@ then email end ) as core_trial_count,
 count(distinct case when free_esign_signups = 1  then email end ) as free_esign_count
  from New_tb 
 where signup_dttm >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13),
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+),
 
 --Inquiry
 inquiry as (
@@ -286,7 +194,8 @@ count(distinct case when lead_inquiry>0
 then email end ) as Inquiry_count
   from New_tb
  where lead_create_date >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13),
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+),
 --Demo Booked 
 demo_bk as (
 SELECT
@@ -307,7 +216,8 @@ when  recent_drift_booked_date is not null then  recent_drift_booked_date  end a
 count(distinct case when recent_chillipiper_booked_date is not null or recent_drift_booked_date is not null then email end ) as demo_booked_count
 from New_tb
 where (recent_chillipiper_booked_date >='2022-01-01' or recent_drift_booked_date>='2022-01-01') 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13),
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+),
 --demo_form
 demo_submission as (
 SELECT
@@ -329,49 +239,95 @@ from New_tb
 where recent_demo_Requested_Date >='2022-01-01' 
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 ),
- dt as (select * from 
-(select distinct fmcd.date
-from dbt_analytics.fi_mrr_calendar_daily fmcd 
-where date>='2022-01-01' and date< current_date) , (select distinct
-  language,
-  Demo_booked_status_Sales_Ops, 
-demo_requested_nonProd,
- demo_request_Prod,
-trials_demo_request_Classification,
-orig_camp,
-   landing_page,
-    new_mktg_class,
-    LP_Cluster,
-    company_size_bucket,
-    email_type,
-    Country
-from New_tb
-)
-) 
-select dt.date, dt.language, dt.Demo_booked_status_Sales_Ops,dt.demo_requested_nonProd,
-dt.demo_request_Prod,
-dt.trials_demo_request_Classification,
-dt.orig_camp, 
-dt.landing_page ,--better for signup landing page
-dt.new_mktg_class,
-dt.LP_Cluster, 
-dt.company_size_bucket, dt.email_type,  dt.Country,
-max(core_trial_count) as core_trial_count,
-max(free_esign_count) as free_esign_count,
-max(demo_booked_count) as demo_booked_count,
-max(Inquiry_count) as Inquiry_count,
-max(MQL_Count) as MQL_Count,
-max(demo_requested_count) as demo_requested_count,
-max(s1_Count_created) as s1_Count_created,
-max(s1_Count_open) as s1_Count_open,
- max(s1_Amount_created) as s1_Amount_created,
-max(s1_Amount_open) as s1_Amount_open,
- max(Acv_Amount_created) as Acv_Amount_created,
- max(Won_count) as Won_count,
-max(Won_Pipe_amount) as Won_Pipe_amount,
- max(Acv_Amount_won) as Acv_Amount_won ,
-max(MRR_Amount_won) as MRR_Amount_won,
-max(ARR_Amount_won) as ARR_Amount_won
+ DT AS (
+    SELECT DISTINCT
+        date_trunc('day',
+            COALESCE(
+                recent_mql_date,
+                opp_s1_date,
+                opp_closedate,
+                signup_dttm::date,
+                lead_create_date,
+                recent_drift_booked_date,
+                recent_chillipiper_booked_date,
+                recent_demo_requested_date
+            )
+        ) AS date,
+        language,
+        Demo_booked_status_Sales_Ops,
+        demo_requested_nonProd,
+        demo_request_Prod,
+        trials_demo_request_Classification,
+        orig_camp,
+        landing_page,
+        new_mktg_class,
+        LP_Cluster,
+        company_size_bucket,
+        email_type,
+         Country
+    FROM New_tb
+    WHERE date_trunc('day', COALESCE(
+            recent_mql_date,
+            opp_s1_date,
+            opp_closedate,
+            signup_dttm::date,
+            lead_create_date,
+            recent_drift_booked_date,
+            recent_chillipiper_booked_date,
+            recent_demo_requested_date
+        )) IS NOT NULL
+        AND date_trunc('day', COALESCE(
+            recent_mql_date,
+            opp_s1_date,
+            opp_closedate,
+            signup_dttm::date,
+            lead_create_date,
+            recent_drift_booked_date,
+            recent_chillipiper_booked_date,
+            recent_demo_requested_date
+        )) >= '2023-09-01'
+         AND date_trunc('day', COALESCE(
+            recent_mql_date,
+            opp_s1_date,
+            opp_closedate,
+            signup_dttm::date,
+            lead_create_date,
+            recent_drift_booked_date,
+            recent_chillipiper_booked_date,
+            recent_demo_requested_date
+        )) <current_date
+),
+Result AS (
+    SELECT
+        dt.date,
+        dt.language,
+        dt.Demo_booked_status_Sales_Ops,
+        dt.demo_requested_nonProd,
+        dt.demo_request_Prod,
+        dt.trials_demo_request_Classification,
+        dt.orig_camp,
+        dt.landing_page,
+        dt.new_mktg_class,
+        dt.LP_Cluster,
+        dt.company_size_bucket,
+        dt.email_type,
+        dt.Country,
+   max(nvl(core_trial_count,0)) as core_trial_count,
+   max(nvl(free_esign_count,0)) as free_esign_count,
+   max(nvl(demo_booked_count,0)) as demo_booked_count,
+   max(nvl(Inquiry_count,0)) as Inquiry_count,
+   max(nvl(MQL_Count,0)) as MQL_Count,
+   max(nvl(demo_requested_count,0)) as demo_requested_count,
+   max(nvl(s1_Count_created,0)) as s1_Count_created,
+   max(nvl(s1_Count_open,0)) as s1_Count_open,
+   max(nvl(s1_Amount_created,0)) as s1_Amount_created,
+   max(nvl(s1_Amount_open,0)) as s1_Amount_open,
+   max(nvl(Acv_Amount_created,0)) as Acv_Amount_created,
+   max(nvl(Won_count,0)) as Won_count,
+   max(nvl(Won_Pipe_amount,0)) as Won_Pipe_amount,
+   max(nvl(Acv_Amount_won,0)) as Acv_Amount_won ,
+  max(nvl(MRR_Amount_won,0)) as MRR_Amount_won,
+  max(nvl(ARR_Amount_won,0)) as ARR_Amount_won
 from dt left join signup 
 on date_trunc('day',dt.date)=date_trunc('day',signup.signup_Date)
 and nvl(dt.language,'NA')=nvl(signup.language,'NA') 
@@ -470,5 +426,30 @@ and NVL(dt.new_mktg_class,'NA')=nvl(won.new_mktg_class,'NA')
 and NVL(dt.company_size_bucket,'NA')=nvl(won.company_size_bucket,'NA')
 and NVL(dt.email_type,'NA')=nvl(won.email_type,'NA')
 and NVL(dt.Country,'NA')=nvl(won.Country,'NA')
-group by  1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+order by 14 desc
+)
+
+select *, rank() over (partition by  date_trunc('month',date) order by demo_landing_page desc) as demo_landing_page_rk,
+dense_rank() over (partition by  date_trunc('month',date) order by mql_landing_page desc) as mql_landing_page_rk,
+dense_rank() over (partition by date_trunc('month',date) order by core_trial_landing_page desc) as core_trial_landing_page_rk,
+dense_rank() over (partition by  date_trunc('month',date) order by free_esign_landing_page desc) as free_esign_landing_page_rk,
+dense_rank() over (partition by  date_trunc('month',date) order by Inquiry_landing_page desc) as Inquiry_landing_page_rk,
+dense_rank() over (partition by  date_trunc('month',date) order by s1_created_landing_page desc) as s1_created_landing_page_rk,
+dense_rank() over (partition by date_trunc('month',date) order by won_landing_page desc) as won_landing_page_rk
+from
+(select *, 
+sum (demo_booked_count) over (partition by  date_trunc('month',date),landing_page) as demo_landing_page ,
+sum (mql_count) over (partition by landing_page, date_trunc('month',date)) as mql_landing_page,
+sum (core_trial_count) over (partition by landing_page, date_trunc('month',date)) as core_trial_landing_page,
+sum (free_esign_count) over (partition by landing_page, date_trunc('month',date)) as free_esign_landing_page,
+sum (Inquiry_count) over (partition by landing_page, date_trunc('month',date)) as Inquiry_landing_page,
+sum (s1_Count_created) over (partition by landing_page, date_trunc('month',date)) as s1_created_landing_page,
+sum (Won_count) over (partition by landing_page, date_trunc('month',date)) as won_landing_page
+from
+(SELECT
+    *
+FROM Result
+ORDER BY date DESC))
+
 ;

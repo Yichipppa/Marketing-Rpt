@@ -42,7 +42,8 @@ case
     opp_s1_date,
     opportunity_status,
     pipeline_revised,
-    acv, -- Adjust the precision and scale for your data
+    opportunity_id, 
+    first_lead_first_touch_opp_won_acv,
     opp_closedate ,
     opp_iswon,
     first_lead_first_touch_new_mrr ,
@@ -109,8 +110,8 @@ orig_camp,
     email_type,
     Country,
 opp_s1_date  as s1_Date,
-count(distinct  case when opp_s1_date is not null then email end ) as s1_Count_created,
-count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open' then email end ) as s1_Count_open,
+count(distinct  case when opp_s1_date is not null then opportunity_id end ) as s1_Count_created,
+count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open' then opportunity_id end ) as s1_Count_open,
 sum(distinct  case when opp_s1_date is not null  then pipeline_revised  end ) as s1_Amount_created,
 count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open' then pipeline_revised end ) as s1_Amount_open,
 sum(case when opp_s1_date is not null then acv end ) as Acv_Amount_created
@@ -135,18 +136,18 @@ orig_camp,
     email_type,
     Country,
 opp_closedate  as won_Date,
-count(distinct  case when opp_closedate is not null and opp_iswon =1
-then email end ) as Won_count,
-sum( case when opp_closedate is not null and opp_iswon =1 then
+count(distinct  case when opp_closedate is not null 
+then opportunity_id end ) as Won_count,
+sum( case when opp_closedate is not null  then
 pipeline_revised  end) as Won_Pipe_amount,
-sum(case when opp_closedate is not null and opp_iswon =1 then
- acv  end ) as Acv_Amount_won,
-sum(case when opp_closedate is not null and opp_iswon =1 then
+sum(case when opp_closedate is not null  then
+ first_lead_first_touch_opp_won_acv  end ) as Acv_Amount_won,
+sum(case when opp_closedate is not null  then
 first_lead_first_touch_new_mrr end) as MRR_Amount_won,
-sum(case when opp_closedate is not null and opp_iswon =1 then
+sum(case when opp_closedate is not null  then
 first_lead_first_touch_new_mrr*12 end) as ARR_Amount_won
   from New_tb
- where opp_closedate >='2022-01-01'  
+ where opp_closedate >='2022-01-01'  and opp_iswon =1
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 ),
 

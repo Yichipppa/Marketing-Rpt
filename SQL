@@ -240,20 +240,12 @@ from New_tb
 where recent_demo_Requested_Date >='2022-01-01' 
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 ),
- DT AS (
-    SELECT DISTINCT
+DT AS (select * from 
+    (SELECT DISTINCT
         date_trunc('day',
-            COALESCE(
-                recent_mql_date,
-                opp_s1_date,
-                opp_closedate,
-                signup_dttm::date,
-                lead_create_date,
-                recent_drift_booked_date,
-                recent_chillipiper_booked_date,
-                recent_demo_requested_date
-            )
-        ) AS date,
+        recent_mql_date     
+     ) AS date FROM New_tb),
+        (select distinct
         language,
         Demo_booked_status_Sales_Ops,
         demo_requested_nonProd,
@@ -266,38 +258,8 @@ group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
         company_size_bucket,
         email_type,
          Country
-    FROM New_tb
-    WHERE date_trunc('day', COALESCE(
-            recent_mql_date,
-            opp_s1_date,
-            opp_closedate,
-            signup_dttm::date,
-            lead_create_date,
-            recent_drift_booked_date,
-            recent_chillipiper_booked_date,
-            recent_demo_requested_date
-        )) IS NOT NULL
-        AND date_trunc('day', COALESCE(
-            recent_mql_date,
-            opp_s1_date,
-            opp_closedate,
-            signup_dttm::date,
-            lead_create_date,
-            recent_drift_booked_date,
-            recent_chillipiper_booked_date,
-            recent_demo_requested_date
-        )) >= '2022-01-01'
-         AND date_trunc('day', COALESCE(
-            recent_mql_date,
-            opp_s1_date,
-            opp_closedate,
-            signup_dttm::date,
-            lead_create_date,
-            recent_drift_booked_date,
-            recent_chillipiper_booked_date,
-            recent_demo_requested_date
-        )) <current_date
-),
+    FROM New_tb)
+    ),
 Result AS (
     SELECT
         dt.date,
@@ -431,26 +393,9 @@ group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 order by 14 desc
 )
 
-select *, rank() over (partition by  date_trunc('month',date) order by demo_landing_page desc) as demo_landing_page_rk,
-dense_rank() over (partition by  date_trunc('month',date) order by mql_landing_page desc) as mql_landing_page_rk,
-dense_rank() over (partition by date_trunc('month',date) order by core_trial_landing_page desc) as core_trial_landing_page_rk,
-dense_rank() over (partition by  date_trunc('month',date) order by free_esign_landing_page desc) as free_esign_landing_page_rk,
-dense_rank() over (partition by  date_trunc('month',date) order by Inquiry_landing_page desc) as Inquiry_landing_page_rk,
-dense_rank() over (partition by  date_trunc('month',date) order by s1_created_landing_page desc) as s1_created_landing_page_rk,
-dense_rank() over (partition by date_trunc('month',date) order by won_landing_page desc) as won_landing_page_rk
-from
-(select *, 
-sum (demo_booked_count) over (partition by  date_trunc('month',date),landing_page) as demo_landing_page ,
-sum (mql_count) over (partition by landing_page, date_trunc('month',date)) as mql_landing_page,
-sum (core_trial_count) over (partition by landing_page, date_trunc('month',date)) as core_trial_landing_page,
-sum (free_esign_count) over (partition by landing_page, date_trunc('month',date)) as free_esign_landing_page,
-sum (Inquiry_count) over (partition by landing_page, date_trunc('month',date)) as Inquiry_landing_page,
-sum (s1_Count_created) over (partition by landing_page, date_trunc('month',date)) as s1_created_landing_page,
-sum (Won_count) over (partition by landing_page, date_trunc('month',date)) as won_landing_page
-from
-(SELECT
+SELECT
     *
 FROM Result
-ORDER BY date DESC))
+ORDER BY date DESC
 
 ;

@@ -23,9 +23,11 @@ case
     when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
     and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
     when Inquiry_Path_Classification='Trials' then 'Trials' 
-  end as trials_demo_request_Classification,
-    nmc.orig_camp,
-    nmc.landing_page,
+  end as trials_demo_request_Classification, nmc.orig_camp,
+  nmc.landing_page,
+  -- case when nmc.orig_camp='' or nmc.orig_camp is null then 'N/A' else nmc.orig_camp end as orig_camp,
+   --case when  nmc.landing_page='' or nmc.landing_page is null 
+   --then 'N/A' else nmc.landing_page end as landing_page,
     nmc.new_mktg_class,
     nmc.lp_cluster,
      company_size_bucket,
@@ -38,25 +40,26 @@ case
         ELSE 'Non-US'
     END AS Country,
     email,
-    recent_mql_date ,
-    opp_s1_date,
+    date_trunc('day',recent_mql_date) as recent_mql_date,
+    date_trunc('day', opp_s1_date) as opp_s1_date,
     opportunity_status,
     pipeline_revised,
     opportunity_id, 
     first_lead_first_touch_opp_won_acv,
-    opp_closedate ,
+    acv,
+    date_trunc('day',opp_closedate) as opp_closedate ,
     opp_iswon,
     first_lead_first_touch_new_mrr ,
-    signup_dttm , -- If this field contains both date and time
+    date_trunc('day',signup_dttm ) as signup_dttm , -- If this field contains both date and time
     first_lead_classification ,
     trial_signups, -- Adjust the data type as needed
     owner_email,
     free_esign_signups, -- Adjust the data type as needed
-    lead_create_date,
+    date_trunc('day',lead_create_date) as lead_create_date,
     lead_inquiry,
-    recent_chillipiper_booked_date ,
-    recent_drift_booked_date ,
-    recent_demo_requested_date 
+    date_trunc('day',recent_chillipiper_booked_date) as recent_chillipiper_booked_date ,
+    date_trunc('day',recent_drift_booked_date) as recent_drift_booked_date ,
+    date_trunc('day',recent_demo_requested_date ) as recent_demo_requested_date
 from dm_main.marketing_channel_ranking_attrib_logic_vw r
 left join 
 yichi_zhang.new_mktg_classification nmc
@@ -112,9 +115,9 @@ orig_camp,
 opp_s1_date  as s1_Date,
 count(distinct  case when opp_s1_date is not null then opportunity_id end ) as s1_Count_created,
 count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open' then opportunity_id end ) as s1_Count_open,
-sum(distinct  case when opp_s1_date is not null  then pipeline_revised  end ) as s1_Amount_created,
+sum(distinct  case when opp_s1_date is not null  then nvl(pipeline_revised,0)  end ) as s1_Amount_created,
 count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open' then pipeline_revised end ) as s1_Amount_open,
-sum(case when opp_s1_date is not null then acv end ) as Acv_Amount_created
+sum(case when opp_s1_date is not null then nvl(acv,0) end ) as Acv_Amount_created
   from New_tb
  where opp_s1_date >='2022-01-01' 
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
@@ -136,18 +139,20 @@ orig_camp,
     email_type,
     Country,
 opp_closedate  as won_Date,
-count(distinct  case when opp_closedate is not null 
+count(distinct  case when opp_closedate is not null AND opp_iswon =1
+and (ct=1 or email=owner_email)
 then opportunity_id end ) as Won_count,
-sum( case when opp_closedate is not null  then
-pipeline_revised  end) as Won_Pipe_amount,
-sum(case when opp_closedate is not null  then
- first_lead_first_touch_opp_won_acv  end ) as Acv_Amount_won,
-sum(case when opp_closedate is not null  then
-first_lead_first_touch_new_mrr end) as MRR_Amount_won,
-sum(case when opp_closedate is not null  then
-first_lead_first_touch_new_mrr*12 end) as ARR_Amount_won
-  from New_tb
- where opp_closedate >='2022-01-01'  and opp_iswon =1
+sum( case when opp_closedate is not null  and opp_iswon =1 then
+nvl(pipeline_revised,0)  end) as Won_Pipe_amount,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+ nvl(first_lead_first_touch_opp_won_acv,0)  end ) as Acv_Amount_won,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+nvl(first_lead_first_touch_new_mrr,0) end) as MRR_Amount_won,
+sum(case when opp_closedate is not null and opp_iswon =1 then
+nvl(first_lead_first_touch_new_mrr,0)*12 end) as ARR_Amount_won
+  from (select * , count(email) over (partition by opportunity_id) as ct 
+from New_tb
+ where opp_closedate >='2022-01-01'  and opp_iswon =1)
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 ),
 
@@ -392,10 +397,6 @@ and NVL(dt.Country,'NA')=nvl(won.Country,'NA')
 group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
 order by 14 desc
 )
-
 SELECT
     *
 FROM Result
-ORDER BY date DESC
-
-;

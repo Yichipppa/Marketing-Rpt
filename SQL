@@ -137,7 +137,7 @@ SELECT
         Country,
 opp_closedate  as won_Date,
 count(distinct  case when opp_closedate is not null AND opp_iswon =1
-and (ct=1 or email=owner_email)
+and (ct=1 or (ct>1 and email=owner_email))
 then opportunity_id end ) as Won_count,
 sum( case when opp_closedate is not null  and opp_iswon =1 then
 nvl(pipeline_revised,0)  end) as Won_Pipe_amount,

@@ -55,7 +55,7 @@ CASE
                 WHEN lower(first_seen_mode) ~* '.*-api.*' THEN 'API'
                 WHEN lower(first_seen_mode) ~* '.*-contract.*' THEN 'Contracts'
                 when  lower(first_seen_mode) ~*  '.*_integrations.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Integrations'
-                when  lower(first_seen_mode) ~*  '.*-proposal.*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
+                when  first_seen_mode ~*  '.*(-proposal|Proposals).*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
                 when  lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
                 when  lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
                when   lower(first_seen_mode) ~* '.*notary.*' then 'notary'

@@ -18,7 +18,7 @@ CASE
             CASE
                 WHEN first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Brand'
                 WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB.*_API.*' THEN 'API'
-                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All solutions'
+                WHEN first_seen_mode ~* '.*(Google|Bing)_Search_NB_All-Solution.*' THEN 'All Solutions'
                 when first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*' and first_seen_mode !~* '.*Free.*' THEN 'Competitor'
                 when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Competitor.*Free.*' THEN 'Competitor Free'
                 when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Contracts.*' THEN 'Contracts'

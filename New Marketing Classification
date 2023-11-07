@@ -31,7 +31,7 @@ CASE
                 when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Integrations_Competitors.*' THEN 'Integrations_Competitors'
                 when   first_seen_mode ~* '.*(Google|Bing)_Search_NB.*HIPAA.*' THEN 'HIPAA'
                 when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Proposals.*' THEN 'Proposals'
-                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Qoutes'
+                when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Quotes.*' THEN 'Quotes'
                 when  first_seen_mode ~* '.*(Google|Bing)_Search_NB_Templates.*' THEN 'Templates'
                 when   first_seen_mode ~* '.*Google_Video.*' THEN 'Video'
                 when   first_seen_mode ~* '.*Display.*' then 'Display'

@@ -64,6 +64,7 @@ CASE
         WHEN lower(first_seen_mode) ~* '.*dv360_video.*' THEN 'Video'
         WHEN lower(first_seen_mode) ~* '.*affiliate.*' THEN 'Affiliate'
         WHEN lower(first_seen_mode) ~* '.* _display.*' THEN 'Display'
+    else 'Other'
     END AS orig_camp,
     CASE
         WHEN first_seen_mode IN ('https://www.pandadoc.com/', 'https://signup.pandadoc.com/') THEN first_seen_mode
@@ -134,6 +135,6 @@ CASE
       when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/.*pandadoc-for-.*' and lower(first_seen_mode) !~* '.*(blog|support ).*' then 'Teams'
      else 'Other'
       end as LP_Cluster
-FROM dm_main.marketing_channel_ranking_attrib_logic_vw
+FROM gtm_analytics.marketing_channel_ranking_attrib_logic_vw
 WHERE company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
 and email is not null

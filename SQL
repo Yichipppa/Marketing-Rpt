@@ -97,7 +97,7 @@ case
     date_trunc('day',recent_chillipiper_booked_date) as recent_chillipiper_booked_date ,
     date_trunc('day',recent_drift_booked_date) as recent_drift_booked_date ,
     date_trunc('day',recent_demo_requested_date ) as recent_demo_requested_date
-from dm_main.marketing_channel_ranking_attrib_logic_vw r
+from gtm_analytics.marketing_channel_ranking_attrib_logic_vw r
 left join 
 yichi_zhang.new_mktg_classification nmc
 on r.first_seen_mode=nmc.first_seen_mode

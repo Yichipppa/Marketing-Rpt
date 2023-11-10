@@ -16,7 +16,7 @@ select distinct
 CASE
         WHEN lower(first_seen_mode) ILIKE '%utm_medium=cpc%' THEN
             CASE
-                WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*' or  THEN 'Brand'
+                WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*'   THEN 'Brand'
                 WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_nb.*_api.*' THEN 'API'
                 WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_nb_all-solution.*' or lower(first_seen_mode) ~* '.*(google|bing)_search_nb_all_solution.*' THEN 'All Solutions'
                 when lower(first_seen_mode) ~* '.*(google|bing)_search_nb_competitor.*' and lower(first_seen_mode) !~* '.*free.*' THEN 'Competitor'

@@ -16,7 +16,7 @@ select distinct
 CASE
         WHEN lower(first_seen_mode) ILIKE '%utm_medium=cpc%' THEN
             CASE
-                WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*' THEN 'Brand'
+                WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*' or  THEN 'Brand'
                 WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_nb.*_api.*' THEN 'API'
                 WHEN lower(first_seen_mode) ~* '.*(google|bing)_search_nb_all-solution.*' or lower(first_seen_mode) ~* '.*(google|bing)_search_nb_all_solution.*' THEN 'All Solutions'
                 when lower(first_seen_mode) ~* '.*(google|bing)_search_nb_competitor.*' and lower(first_seen_mode) !~* '.*free.*' THEN 'Competitor'
@@ -67,10 +67,11 @@ CASE
     else 'Other'
     END AS orig_camp,
     CASE
-        WHEN first_seen_mode IN ('https://www.pandadoc.com/', 'https://signup.pandadoc.com/') THEN first_seen_mode
+        WHEN first_seen_mode ilike '%pandadoc.com/' THEN first_seen_mode
         WHEN first_seen_mode ilike '%register.pandadoc.com%' then 'https://register.pandadoc.com'
         WHEN first_seen_mode ilike '%signup.pandadoc.com%' then 'https://signup.pandadoc.com'
         WHEN first_seen_mode ILIKE '%/?ss=%' and first_seen_mode not ILIKE '%utm%' THEN first_seen_mode
+         WHEN first_seen_mode ILIKE '%/?ss=%' and first_seen_mode ILIKE '%utm%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
         WHEN first_seen_mode ILIKE '%app.pandadoc.com%' then REGEXP_SUBSTR(first_seen_mode, '^(https://[^/]+/[^/]+)')
         WHEN first_seen_mode ILIKE '%oauth%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
         when first_seen_mode ILIKE '%.com/?utm%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')

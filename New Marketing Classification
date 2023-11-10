@@ -70,14 +70,14 @@ else 'Other'
     else 'Other'
     END AS orig_camp,
     CASE
-        WHEN first_seen_mode ilike '%pandadoc.com/' THEN first_seen_mode
+        WHEN first_seen_mode ilike '%pandadoc.com/' or first_seen_mode ilike '%pandadoc.com/?'  THEN first_seen_mode
         WHEN first_seen_mode ilike '%register.pandadoc.com%' then 'https://register.pandadoc.com'
         WHEN first_seen_mode ilike '%signup.pandadoc.com%' then 'https://signup.pandadoc.com'
         WHEN first_seen_mode ILIKE '%/?ss=%' and first_seen_mode not ILIKE '%utm%' THEN first_seen_mode
-         WHEN first_seen_mode ILIKE '%/?ss=%' and first_seen_mode ILIKE '%utm%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
+        -- WHEN first_seen_mode ILIKE '%/?ss=%' and first_seen_mode ILIKE '%utm%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
         WHEN first_seen_mode ILIKE '%app.pandadoc.com%' then REGEXP_SUBSTR(first_seen_mode, '^(https://[^/]+/[^/]+)')
         WHEN first_seen_mode ILIKE '%oauth%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
-        when first_seen_mode ILIKE '%.com/?utm%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
+        when first_seen_mode ILIKE '%.com/?%'  THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
         ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+/[^?]+)', 1, 1, 'i')
     END AS landing_page,
     CASE

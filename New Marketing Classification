@@ -38,6 +38,7 @@ CASE
                 when   lower(first_seen_mode) ~* '.*(Google|Bing)_Search_NB_Forms.*' then 'Forms'
                  when   lower(first_seen_mode) ~* '.*notary.*' then 'Notary'
                when   lower(first_seen_mode) ~* '.*(google|bing)_search_nb_documents.*' then 'Documents'
+else 'Other'
             END
         WHEN lower(first_seen_mode) ILIKE '%utm_medium=review_sites%'  or   lower(first_seen_mode) ilike '%utm_medium=review-sites%' THEN
             CASE
@@ -49,6 +50,7 @@ CASE
                 when   first_seen_mode ~* '.*listing_salesforce_automation.*' THEN 'Integrations_Salesforce'
                 when first_seen_mode ~* '.*listing_proposal_(management|automation).*' THEN 'Proposals'
                 when   first_seen_mode ~* '.*listing_quoting.*' THEN 'Quotes'
+else 'Other'
                 END
         WHEN lower(first_seen_mode) ILIKE '%utm_medium=paid-social%' THEN
             CASE
@@ -59,6 +61,7 @@ CASE
                 when  lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
                 when  lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
                when   lower(first_seen_mode) ~* '.*notary.*' then 'notary'
+else 'Other'
                 END
         WHEN lower(first_seen_mode) ~* '.*rmkt=true.*' THEN 'RMKT'
         WHEN lower(first_seen_mode) ~* '.*dv360_video.*' THEN 'Video'

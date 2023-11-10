@@ -76,15 +76,15 @@ CASE
         ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+/[^?]+)', 1, 1, 'i')
     END AS landing_page,
     CASE
-    WHEN  first_seen_mode ~* '.*(Google|Bing)_Search_Brand.*' THEN 'Paid brand search'
-    WHEN first_seen_mode ~*  '.*(Google|Bing)_Search_NB.*' THEN 'Paid nonbrand search'
-    WHEN  first_seen_mode ~* '.*(dv360|DV360|google|Google)_display.*' THEN 'Display and programmatic'
+    WHEN  lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*' THEN 'Paid brand search'
+    WHEN lower(first_seen_mode) ~*  '.*(google|bing)_search_nb.*' THEN 'Paid nonbrand search'
+    WHEN  lower(first_seen_mode) ~* '.*(dv360|google)_display.*' THEN 'Display and programmatic'
     WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/' THEN 'Organic brand search'
     WHEN  mktg_chnl='Organic' and first_seen_mode = 'https://www.pandadoc.com/pricing/' THEN 'Organic brand search'
     WHEN  mktg_chnl='Organic' and first_seen_mode NOT IN ('https://www.pandadoc.com/pricing/', 'https://www.pandadoc.com/') THEN 'Organic nonbrand search'
     WHEN  mktg_chnl='Organic' and first_seen_mode != 'https://www.pandadoc.com/pricing/' THEN 'Organic nonbrand search'
     WHEN lower(first_seen_mode) ~* '.*viral.*' THEN 'Viral'
-    WHEN lower(first_seen_mode) ~* '.*google_Video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
+    WHEN lower(first_seen_mode) ~* '.*google_video.*' OR lower(first_seen_mode) ~*  '.*dv360_video.*' THEN 'Youtube and video'
    -- WHEN REGEXP_MATCH(first_seen_mode, 'Google_Video.*') AND REGEXP_MATCH(first_seen_mode, 'cpc') THEN 'Youtube and video'
     WHEN lower(first_seen_mode) ~*  '.*paid-social.*' --or new_mktg_class = 'Paid Social' 
      THEN 'Paid social'
@@ -107,7 +107,7 @@ CASE
       when lower(first_seen_mode) ~* '.*www.pandadoc.com/(how-to|ask\/).*' then 'Ask'
       when lower(first_seen_mode) ~* '.*(template|agreement).*|.*-form\/$' and lower(first_seen_mode) !~* '.*(ask|blog|(notary|developers)\.pandadoc\.com).*' then 'Templates'
       when lower(first_seen_mode) ~* '.*www\.pandadoc\.com\/($|(es\/|fr\/|de\/|nl\/|pl\/|pt-pt\/|se\/|es|fr|de|nl|pl|pt-pt|se)$)' then 'Homepage'
-      when lower(first_seen_mode) ~* '.*www\.pandadoc\.com.*\/pricing\/' then 'Pricing'
+      when lower(first_seen_mode) ilike '%pricing%' then 'Pricing'
       when lower(first_seen_mode) ~* '.*www\.pandadoc\.com.*\/tour\/' then 'Tour'
       when lower(first_seen_mode) ~* '.*(demo|getdemo)\.pandadoc\.com\/.*|.*www\.pandadoc\.com\/(demo|demo-hipaa|demo-api)\/' then 'Demo'
       when lower(first_seen_mode) ~* '.*alternative.*' and lower(first_seen_mode) !~* '.*(blog|notary\.pandadoc\.com).*' then 'Alternatives' 

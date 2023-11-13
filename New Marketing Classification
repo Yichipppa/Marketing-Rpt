@@ -60,7 +60,7 @@ else 'Other'
                 when  first_seen_mode ~*  '.*(-proposal|Proposals).*' and first_seen_mode !~* '.*retargeting.*' THEN 'Proposals'
                 when  lower(first_seen_mode) ~*  '.*_quotes.*' and first_seen_mode !~*  '.*retargeting.*' THEN 'Quotes'
                 when  lower(first_seen_mode) ~*  '.*retargeting.*' THEN 'RMKT'
-               when   lower(first_seen_mode) ~* '.*notary.*' then 'notary'
+               when   lower(first_seen_mode) ~* '.*notary.*' then 'Notary'
 else 'Other'
                 END
         WHEN lower(first_seen_mode) ~* '.*rmkt=true.*' THEN 'RMKT'

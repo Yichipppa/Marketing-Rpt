@@ -78,7 +78,7 @@ else 'Other'
         WHEN first_seen_mode ILIKE '%app.pandadoc.com%' then REGEXP_SUBSTR(first_seen_mode, '^(https://[^/]+/[^/]+)')
         WHEN first_seen_mode ILIKE '%oauth%' THEN REGEXP_SUBSTR(first_seen_mode, '^(https://[a-zA-Z0-9.-]+)/')
         when first_seen_mode ILIKE '%.com/?%'  THEN REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+)', 1, 1, 'e')
-        ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^/?]+/[^?]+)', 1, 1, 'i')
+        ELSE REGEXP_SUBSTR(first_seen_mode, '^(https?://[^?]+)', 1, 1, 'e')
     END AS landing_page,
     CASE
     WHEN  lower(first_seen_mode) ~* '.*(google|bing)_search_brand.*' THEN 'Paid brand search'

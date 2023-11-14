@@ -50,7 +50,7 @@ select date_trunc('day',date) as date,
            when lower(campaign) ~* '(google|bing)_search_nb_quotes.*' or 
          (chnl='Paid Social' and lower(campaign) ~* '.*quotes.*' and lower(campaign) !~* '.*retargeting.*')
           then 'Qoutes'
-           when lower(campaign)~* '((google|bing)_search_nb_templates.*' 
+           when lower(campaign)~* '(google|bing)_search_nb_templates.*' 
           then 'Templates'
            when lower(campaign) ~* '.*retargeting.*'  or  lower(campaign) ~* '.*rmkt.*'
           then 'RMKT'

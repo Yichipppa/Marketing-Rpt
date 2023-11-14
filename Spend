@@ -1,0 +1,69 @@
+select date_trunc('day',date) as date,
+           case when country in ('US','United States') then 'US' 
+           when NVL(country,'na') not in ('US','United States') then 'Non-US' 
+           when chnl='Display&Video 360' then 'US' 
+           when campaign ilike '%_US%' then 'US' else 'Non-US'
+           end as country, 
+           case when lower(campaign) ilike '%agree%' then 'Agree'
+             when lower(campaign) ilike '%sell%' then 'Sell'
+	             when lower(campaign) ilike '%agreements%' then 'Agree'
+              when lower(campaign) ilike '%esign%' then 'Agree'
+              when lower(campaign) ilike '%contracts%' then 'Agree'
+              when lower(campaign) ilike '%proposals%' then 'Sell'
+             when lower(campaign) ilike '%quotes%' then 'Sell'
+              when lower(campaign) ilike '%brand%' then 'Agree'
+              when lower(campaign) ilike '%compete%' or lower(campaign) ilike '%competitor%' then 'Agree' end as Sell_agree,
+           case when campaign ~* '(Google|Bing)_Search_Brand.*' then 'Paid brand search'
+              when campaign ~* '(Google|Bing)_Search_NB.*' then 'Paid nonbrand search' 
+              when campaign ~* 'Google_Video.*'  or campaign ~* '.*DV360_Video.*' or raw_chnl='YOUTUBE_WATCH' or campaign ilike '%Youtube%'
+              then 'Youtube and video'
+              when chnl='Paid Social' or source in ('Linkedin Ads','Facebook') then 'Paid social'
+             when (chnl='Display&Video 360' and campaign ilike ('%Display%') )or ( campaign ~* '.*(DV360_Display|dv360_display|Google_Display).*') then 'Display and programmatic'
+            end as new_mktg_class,
+           case when lower(campaign) ~* '(google|bing)_search_brand.*' then 'Brand'
+         when lower(campaign) ~* '(google|bing)_search_nb.*_api.*' or lower(campaign) ~* 'api.*' or
+         (chnl='Paid Social' and (lower(campaign) ~* '.*api.*' or lower(campaign) ~* 'api.*') and lower(campaign) !~* '.*retargeting.*')
+          then 'API'
+          when lower(campaign) ~* '(google|bing)_search_nb_all-solution.*' or lower(campaign) ~* '.*all-solution' or lower(campaign) ~* '(google|bing)_search_nb_all_solution.*'  then 'All solutions'
+          when lower(campaign) ~* '(google|bing)_search_nb_competitor.*'  and lower(campaign) !~* '.*free.*' then 'Competitor'
+          when lower(campaign) ~* '(google|bing)_search_nb_competitor.*free.*' then 'Competitor Free'
+          when lower(campaign) ~* '(google|bing)_search_nb_contracts.*'  or 
+          (chnl='Paid Social' and lower(campaign) ~* '.*contract.*' and lower(campaign) !~* '.*retargeting.*')
+          then 'Contracts'
+          when lower(campaign) ~* '(google|bing)_search_nb_esignatures.*' and  lower(campaign) !~* '.*(pdf|free).*' then 'eSign'
+          when lower(campaign) ~* '(google|bing)_search_nb_esignatures_pdf.*' and  lower(campaign) !~* '.*free.*' then 'eSign_PDF'
+         when lower(campaign) ~* '(google|bing)_search_nb_esignatures.*free.*'  then 'eSign_Free'
+          when lower(campaign) ~* '(google|bing)_search_nb_industries.*'  then 'Industries'
+          when (lower(campaign) ~* '(google|bing)_search_nb_integrations.*' and lower(campaign) !~*'.*(salesforce|competitors).*' )or 
+         (chnl='Paid Social' and lower(campaign) ~* '.*integrations.*' and lower(campaign) !~* '.*retargeting.*')
+          then 'Integrations'
+          when lower(campaign) ~* '(google|bing)_search_nb_integrations.*salesforce.*' and lower(campaign) !~*'.*competitors.*' 
+          then 'Integrations_Salesforce'
+          when lower(campaign) ~* '(google|bing)_search_nb_integrations_competitors.*' 
+          then 'Integrations_Competitors'
+          when lower(campaign) ~* '(google|bing)_search_nb.*hipaa.*' 
+          then 'HIPAA'
+          when lower(campaign) ~* '(google|bing)_search_nb_proposals.*' or 
+         ( (lower(campaign)  ~* '.*(proposal|proposals).*' or lower(campaign)  ~* '(proposal|proposals).*' )
+         and lower(campaign) !~* '.*retargeting.*')
+          then 'Proposals'
+           when lower(campaign) ~* '(google|bing)_search_nb_quotes.*' or 
+         (chnl='Paid Social' and lower(campaign) ~* '.*quotes.*' and lower(campaign) !~* '.*retargeting.*')
+          then 'Qoutes'
+           when lower(campaign)~* '((google|bing)_search_nb_templates.*' 
+          then 'Templates'
+           when lower(campaign) ~* '.*retargeting.*'  or  lower(campaign) ~* '.*rmkt.*'
+          then 'RMKT'
+           when lower(campaign) ~* '.*google_video.*.*'  or  lower(campaign)  ~* '.*dv360_video.*' or lower(campaign) ilike '%video%'
+          then 'Video'
+           when lower(campaign) ilike '%display%'
+          then 'Display'
+                when   lower(campaign) ~* '(google|bing)_search_nb_forms.*' then 'Forms'
+                 when   lower(campaign) ~* '.*notary.*' then 'Notary'
+               when  lower(campaign) ~* '(google|bing)_search_nb_documents.*' then 'Documents'
+               else 'Other' end as orig_camp,
+              SUM(SPEND) as spend
+            from public.campaign_geo_state_ads_f_v V
+            where date>='2022-01-01'
+            group by 1,2,3,4,5
+            order by 6 desc

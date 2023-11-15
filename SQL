@@ -13,6 +13,7 @@ demo_requested_nonProd VARCHAR(255),
  landing_page VARCHAR(512),
   new_mktg_class VARCHAR(255),
   LP_Cluster VARCHAR(255),
+  utm_term_value VARCHAR(255),
   company_size_bucket VARCHAR(20), -- Adjust the length as needed
    email_type VARCHAR(50), -- Adjust the length as needed
    Country VARCHAR(50), -- Adjust the length as needed
@@ -67,6 +68,7 @@ case
    --then 'N/A' else nmc.landing_page end as landing_page,
     nmc.new_mktg_class,
     nmc.lp_cluster,
+    utm_term_value,
      company_size_bucket,
     CASE
         WHEN email_type IN ('Business Email Domain', 'Government Email Domain', 'Education Email Domain', 'Personal Email Domain') THEN email_type
@@ -124,6 +126,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+ utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -132,7 +135,7 @@ orig_camp,
 FROM New_tb tb
 WHERE recent_mql_date >= '2022-01-01'
     AND company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14
 ),
 --S1
 s1 as (
@@ -146,6 +149,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -157,7 +161,7 @@ count(distinct  case when opp_s1_date is not null  and opportunity_status ='Open
 sum(case when opp_s1_date is not null then nvl(acv,0) end ) as Acv_Amount_created
   from New_tb
  where opp_s1_date >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 
 --Won
@@ -172,6 +176,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -190,7 +195,7 @@ nvl(first_lead_first_touch_new_mrr,0)*12 end) as ARR_Amount_won
   from (select * , count(email) over (partition by opportunity_id) as ct 
 from New_tb
  where opp_closedate >='2022-01-01'  and opp_iswon =1)
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 
 --Signup
@@ -205,6 +210,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -214,7 +220,7 @@ then email end ) as core_trial_count,
 count(distinct case when free_esign_signups = 1  then email end ) as free_esign_count
  from New_tb 
 where signup_dttm >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 
 --Inquiry
@@ -229,6 +235,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -237,7 +244,7 @@ count(distinct case when lead_inquiry>0
 then email end ) as Inquiry_count
   from New_tb
  where lead_create_date >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 --Demo Booked 
 demo_bk as (
@@ -251,6 +258,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -259,7 +267,7 @@ when  recent_drift_booked_date is not null then  recent_drift_booked_date  end a
 count(distinct case when recent_chillipiper_booked_date is not null or recent_drift_booked_date is not null then email end ) as demo_booked_count
 from New_tb
 where (recent_chillipiper_booked_date >='2022-01-01' or recent_drift_booked_date>='2022-01-01') 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 --demo_form
 demo_submission as (
@@ -273,6 +281,7 @@ orig_camp,
    landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country,
@@ -280,7 +289,7 @@ recent_demo_Requested_Date as demo_requested_date,
 count(distinct case when recent_demo_Requested_Date is not null then email end ) as demo_requested_count
 from New_tb
 where recent_demo_Requested_Date >='2022-01-01' 
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
 ),
 DT AS (SELECT
     date_trunc('day', date)::DATE AS date,
@@ -293,6 +302,7 @@ DT AS (SELECT
     landing_page,
     new_mktg_class,
     LP_Cluster,
+utm_term_value,
     company_size_bucket,
     email_type,
     Country
@@ -307,6 +317,7 @@ FROM
         landing_page,
         new_mktg_class,
         LP_Cluster,
+utm_term_value,
         company_size_bucket,
         email_type,
         Country
@@ -318,7 +329,7 @@ CROSS JOIN (
         date_trunc('day', lead_create_date) AS date
     FROM New_tb
 ) AS all_dates
-ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14
     )
     ,
 Result AS (
@@ -333,6 +344,7 @@ Result AS (
         dt.landing_page,
         dt.new_mktg_class,
         dt.LP_Cluster,
+         dt.utm_term_value,
         dt.company_size_bucket,
         dt.email_type,
         dt.Country,
@@ -363,6 +375,7 @@ and NVL(dt.orig_camp,'NA')=nvl(signup.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(signup.landing_page,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(signup.new_mktg_class,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(signup.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(signup.utm_term_value,'NA')
 and nvl(dt.company_size_bucket,'NA')=nvl(signup.company_size_bucket,'NA')
 and nvl(dt.email_type,'NA')=nvl(signup.email_type,'NA')
 and nvl(dt.Country,'NA')=nvl(signup.Country,'NA')
@@ -376,6 +389,7 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(dbk.trials_demo_request_
 and NVL(dt.orig_camp,'NA')=nvl(dbk.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(dbk.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(dbk.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(dbk.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(dbk.new_mktg_class,'NA')
 and nvl(dt.company_size_bucket,'NA')=nvl(dbk.company_size_bucket,'NA')
 and nvl(dt.email_type,'NA')=nvl(dbk.email_type,'NA')
@@ -390,6 +404,7 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(iq.trials_demo_request_C
 and NVL(dt.orig_camp,'NA')=nvl(iq.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(iq.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(iq.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(iq.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(iq.new_mktg_class,'NA')
 and NVL(dt.company_size_bucket,'NA')=nvl(iq.company_size_bucket,'NA')
 and NVL(dt.email_type,'NA')=nvl(iq.email_type,'NA')
@@ -404,6 +419,7 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(mql.trials_demo_request_
 and NVL(dt.orig_camp,'NA')=nvl(mql.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(mql.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(mql.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(mql.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(mql.new_mktg_class,'NA')
 and nvl(dt.company_size_bucket,'NA')=nvl(mql.company_size_bucket,'NA')
 and nvl(dt.email_type,'NA')=nvl(mql.email_type,'NA')
@@ -418,6 +434,7 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(dsm.trials_demo_request_
 and NVL(dt.orig_camp,'NA')=nvl(dsm.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(dsm.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(dsm.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(dsm.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(dsm.new_mktg_class,'NA')
 and nvl(dt.company_size_bucket,'NA')=nvl(dsm.company_size_bucket,'NA')
 and nvl(dt.email_type,'NA')=nvl(dsm.email_type,'NA')
@@ -432,6 +449,7 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(s1.trials_demo_request_C
 and NVL(dt.orig_camp,'NA')=nvl(s1.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(s1.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(s1.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(s1.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(s1.new_mktg_class,'NA')
 and NVL(dt.company_size_bucket,'NA')=nvl(s1.company_size_bucket,'NA')
 and nvl(dt.email_type,'NA')=nvl(s1.email_type,'NA')
@@ -446,12 +464,13 @@ and NVL(dt.trials_demo_request_Classification,'NA')=nvl(won.trials_demo_request_
 and NVL(dt.orig_camp,'NA')=nvl(won.orig_camp,'NA')
 and NVL(dt.landing_page,'NA')=nvl(won.landing_page,'NA')
 and NVL(dt.LP_Cluster,'NA')=nvl(won.LP_Cluster,'NA')
+and NVL(dt.utm_term_value,'NA')=nvl(won.utm_term_value,'NA')
 and NVL(dt.new_mktg_class,'NA')=nvl(won.new_mktg_class,'NA')
 and NVL(dt.company_size_bucket,'NA')=nvl(won.company_size_bucket,'NA')
 and NVL(dt.email_type,'NA')=nvl(won.email_type,'NA')
 and NVL(dt.Country,'NA')=nvl(won.Country,'NA')
-group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13
-order by 14 desc
+group by 1 ,2,3,4,5,6,7,8,9,10,11,12,13,14
+order by 15 desc
 )
 SELECT
     *

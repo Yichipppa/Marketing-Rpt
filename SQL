@@ -61,13 +61,12 @@ case
     when Inquiry_Path_Classification = 'Camp Member - Demo HandRaiser' 
     and  all_Demo_status= 'Demo Requested from Product' then 'In-product Demo Requests'
     when Inquiry_Path_Classification='Trials' then 'Trials' 
-  end as trials_demo_request_Classification, nmc.orig_camp,
-   nmc.landing_page,
-  -- case when nmc.orig_camp='' or nmc.orig_camp is null then 'N/A' else nmc.orig_camp end as orig_camp,
-   --case when  nmc.landing_page='' or nmc.landing_page is null 
-   --then 'N/A' else nmc.landing_page end as landing_page,
-    nmc.new_mktg_class,
-    nmc.lp_cluster,
+  end as trials_demo_request_Classification, --nmc.orig_camp,
+   --nmc.landing_page,
+  case when nmc.orig_camp='' or nmc.orig_camp is null then 'Other' else nmc.orig_camp end as orig_camp,
+  case when nmc.landing_page='' or nmc.landing_page is null then 'Other' else nmc.landing_page end as landing_page,
+    case when nmc.new_mktg_class is null then 'Other' else nmc.new_mktg_class end as new_mktg_class,
+     case when  nmc.lp_cluster is null then 'Other' else nmc.lp_cluster end as lp_cluster,
     utm_term_value,
      company_size_bucket,
     CASE

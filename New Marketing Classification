@@ -3,17 +3,35 @@ DROP TABLE IF EXISTS yichi_zhang.new_mktg_classification;
 CREATE TABLE yichi_zhang.new_mktg_classification  (
     first_seen_mode VARCHAR(512),
     mktg_chnl VARCHAR(255), -- Adjust the data types as needed
+       sell_agree VARCHAR(255),
     orig_camp VARCHAR(255),
     landing_page VARCHAR(255),
     new_mktg_class VARCHAR(255),
     lp_cluster VARCHAR(255),
     utm_term_value VARCHAR(255)
+  
 );
 
 -- Insert data into the table from your source table (dm_main.marketing_channel_ranking_attrib_logic_vw)
 INSERT INTO yichi_zhang.new_mktg_classification 
-select distinct
+select first_seen_mode,mktg_chnl, case when sell_agree_temp is not null then sell_agree_temp
+else persona end as sell_agree,
+orig_camp,
+ landing_page,
+    new_mktg_class,
+    lp_cluster,
+    utm_term_value
+    from 
+(select distinct
    first_seen_mode,mktg_chnl,
+   case when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%agreement%' then 'Agree'
+   when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%esign%' then 'Agree'
+   when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%contract%' then 'Agree'
+  when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%brand%' then 'Agree'
+  when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%compete%' then 'Agree'
+ when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%proposal%' then 'Sell'
+ when lower(first_seen_mode) ILIKE '%utm%' and  lower(first_seen_mode) ilike '%quote%' then 'Sell'
+ else null end as sell_agree_temp,
 CASE
         WHEN lower(first_seen_mode) ILIKE '%utm_medium=cpc%' THEN
             CASE
@@ -168,4 +186,6 @@ REPLACE(
     ) AS utm_term_value
 FROM gtm_analytics.marketing_channel_ranking_attrib_logic_vw
 WHERE company_size_bucket IN ('1-10', '11-50', '51-200', '201-1000', '1001+')
-and email is not null
+and email is not null) tp
+left join yichi_zhang.sell_vs_agree sva
+on tp.landing_page=sva.page_url 
